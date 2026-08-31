@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+// Shared across schedule_assignments / unavailability_requests / rotation tables.
+// rotation_members and rotation_state only ever use KHATIB/IMAM in practice — enforced
+// at the application layer (see src/lib/scheduling), not via a DB constraint.
+enum DutyType {
+  ROOM_BOOKING
+  KHATIB
+  IMAM
+}
+
+enum ScheduleStatus {
+  UPCOMING
+  COMPLETED
+  CANCELLED
+}
+
+enum AssignmentType {
+  ROTATION
+  FIXED
+  REPLACEMENT
+  MANUAL
+}
+
+enum AssignmentStatus {
+  ASSIGNED
+  REPLACEMENT_NEEDED
+  CONFIRMED
+  CANCELLED
+}
+
+enum UnavailabilityStatus {
+  ACTIVE
+  RESOLVED
+  CANCELLED
+}
+
+enum NotificationType {
+  H1_REMINDER
+  WEEKLY_SUMMARY
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique @db.VarChar(191)
+  role        Role     @default(MEMBER)
+  canBookRoom Boolean  @default(false) @map("can_book_room")
+  canBeKhatib Boolean  @default(false) @map("can_be_khatib")
+  canBeImam   Boolean  @default(false) @map("can_be_imam")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  fixedRoomBookerFor     AppSettings[]           @relation("AppSettingsFixedRoomBooker")
+  rotationMemberships    RotationMember[]
+  rotationStatesAsLast   RotationState[]         @relation("RotationStateLastAssigned")
+  assignmentsAssigned    ScheduleAssignment[]    @relation("AssignedUser")
+  assignmentsOriginal    ScheduleAssignment[]    @relation("OriginalUser")
+  unavailabilityRequests UnavailabilityRequest[]
+
+  @@index([isActive])
+  @@map("users")
+}
+
+model AppSettings {
+  // Fixed literal PK — MySQL has no native single-row constraint, so the app always
+  // reads/writes via upsert({ where: { id: "singleton" } }).
+  id                            String   @id @default("singleton")
+  fixedRoomBookerId             String?  @map("fixed_room_booker_id")
+  fixedRoomBooker               User?    @relation("AppSettingsFixedRoomBooker", fields: [fixedRoomBookerId], references: [id])
+  avoidSamePersonMultipleDuties Boolean  @default(true) @map("avoid_same_person_multiple_duties")
+  reminderEnabled               Boolean  @default(true) @map("reminder_enabled")
+  reminderDaysBefore            Int      @default(1) @map("reminder_days_before")
+  weeklySummaryEnabled          Boolean  @default(true) @map("weekly_summary_enabled")
+  createdAt                     DateTime @default(now()) @map("created_at")
+  updatedAt                     DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
+
+model RotationMember {
+  id            String   @id @default(cuid())
+  dutyType      DutyType @map("duty_type")
+  userId        String   @map("user_id")
+  user          User     @relation(fields: [userId], references: [id])
+  rotationOrder Int      @map("rotation_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([dutyType, userId])
+  @@unique([dutyType, rotationOrder])
+  @@index([dutyType, rotationOrder])
+  @@map("rotation_members")
+}
+
+model RotationState {
+  id                 String    @id @default(cuid())
+  dutyType           DutyType  @unique @map("duty_type")
+  lastAssignedUserId String?   @map("last_assigned_user_id")
+  lastAssignedUser   User?     @relation("RotationStateLastAssigned", fields: [lastAssignedUserId], references: [id])
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  @@map("rotation_state")
+}
+
+model Schedule {
+  id        String         @id @default(cuid())
+  date      DateTime       @unique @db.Date
+  status    ScheduleStatus @default(UPCOMING)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  assignments            ScheduleAssignment[]
+  unavailabilityRequests UnavailabilityRequest[]
+  notificationLogs       NotificationLog[]
+
+  @@index([status, date])
+  @@map("schedules")
+}
+
+model ScheduleAssignment {
+  id             String           @id @default(cuid())
+  scheduleId     String           @map("schedule_id")
+  schedule       Schedule         @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  dutyType       DutyType         @map("duty_type")
+  assignedUserId String?          @map("assigned_user_id")
+  assignedUser   User?            @relation("AssignedUser", fields: [assignedUserId], references: [id])
+  originalUserId String?          @map("original_user_id")
+  originalUser   User?            @relation("OriginalUser", fields: [originalUserId], references: [id])
+  assignmentType AssignmentType   @map("assignment_type")
+  status         AssignmentStatus @default(ASSIGNED)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  @@unique([scheduleId, dutyType])
+  @@index([assignedUserId])
+  @@index([status])
+  @@map("schedule_assignments")
+}
+
+model UnavailabilityRequest {
+  id         String               @id @default(cuid())
+  userId     String               @map("user_id")
+  user       User                 @relation(fields: [userId], references: [id])
+  scheduleId String               @map("schedule_id")
+  schedule   Schedule             @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  dutyType   DutyType             @map("duty_type")
+  reason     String               @db.Text
+  status     UnavailabilityStatus @default(ACTIVE)
+  createdAt  DateTime             @default(now()) @map("created_at")
+  updatedAt  DateTime             @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([scheduleId, dutyType])
+  @@index([status])
+  @@map("unavailability_requests")
+}
+
+// Idempotency guard for H-1 / weekly reminder emails: create() throws on a duplicate
+// (scheduleId, type) pair, which the sender treats as "already sent."
+model NotificationLog {
+  id         String           @id @default(cuid())
+  scheduleId String           @map("schedule_id")
+  schedule   Schedule         @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  sentAt     DateTime         @default(now()) @map("sent_at")
+
+  @@unique([scheduleId, type])
+  @@map("notification_logs")
+}
