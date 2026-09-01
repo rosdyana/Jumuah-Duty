@@ -45,7 +45,7 @@ services:
       SEED_ADMIN_NAME: ${SEED_ADMIN_NAME}
       NODE_ENV: production
     ports:
-      - "3000:3000"
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
 
   scheduler:
     build:

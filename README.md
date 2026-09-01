@@ -67,17 +67,30 @@ This brings up three containers:
   `docker compose down`/redeploys (only `docker compose down -v` removes it).
 - **app** — the Next.js app (`docker/Dockerfile`, standalone output). On
   every start, its entrypoint runs `prisma migrate deploy` then `prisma db
-  seed` (idempotent) before starting the server. Exposes port `3000` on the
-  host.
+  seed` (idempotent) before starting the server.
 - **scheduler** — a minimal Alpine + busybox-cron container
   (`docker/scheduler`) that POSTs to the app's `/api/cron/reminders` once
   daily (`docker/scheduler/crontab`) with a shared secret (`CRON_SECRET`).
 
-Put a reverse proxy in front of the `app` container's exposed port (e.g.
-Caddy on the host, `reverse_proxy localhost:3000`) to terminate TLS and
-serve the app on your domain. `mysql`'s port is bound to `127.0.0.1` only
-(not reachable from outside the host) — useful for local inspection via a
-DB client, never exposed to the network.
+Both `mysql` (port `3306`) and `app` (port `3000` by default) are bound to
+`127.0.0.1` only — never reachable from outside the host, only from a
+reverse proxy running on the same machine. Set `APP_PORT` in `.env` if
+`3000` collides with another service already on the host — the container's
+internal port (used by `scheduler` over the compose network) is unaffected
+either way, only the host-side mapping changes.
+
+### Caddy reverse proxy (or any other proxy already on the host)
+
+```
+jumuah.yourdomain.com {
+    reverse_proxy 127.0.0.1:3000   # or your chosen APP_PORT
+}
+```
+
+Set `AUTH_URL` in `.env` to the **public** HTTPS URL Caddy serves
+(`https://jumuah.yourdomain.com`), not `localhost` — NextAuth uses it to
+build the OAuth callback/redirect URLs, and it must match the redirect URI
+registered on the Azure AD app.
 
 Verified end-to-end (clean volume → build → migrate → seed → serve →
 scheduler auth) via `docker compose up -d --build` during development.
