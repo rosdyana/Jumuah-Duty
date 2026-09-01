@@ -75,13 +75,27 @@ This brings up three containers:
 
 Put a reverse proxy in front of the `app` container's exposed port (e.g.
 Caddy on the host, `reverse_proxy localhost:3000`) to terminate TLS and
-serve the app on your domain.
+serve the app on your domain. `mysql`'s port is bound to `127.0.0.1` only
+(not reachable from outside the host) — useful for local inspection via a
+DB client, never exposed to the network.
 
-> Docker build/run wasn't verified end-to-end during development — the dev
-> machine's Docker daemon required elevated Windows permissions this
-> session didn't have. `pnpm build` (production build), `pnpm test`, and
-> `tsc --noEmit` all pass locally. Verify `docker compose up -d --build`
-> once on the actual deployment target.
+Verified end-to-end (clean volume → build → migrate → seed → serve →
+scheduler auth) via `docker compose up -d --build` during development.
+
+### Adding a future migration
+
+Schema changes need a new migration file generated against a real database
+before deploying (`prisma migrate deploy` only applies existing migration
+files — it never generates one):
+
+```bash
+docker compose up -d mysql
+DATABASE_URL="mysql://root:root@127.0.0.1:3306/masjid" pnpm exec prisma migrate dev --name <change-description>
+```
+
+(Use the root credentials only for this one-off step — schema changes need
+privileges the app's regular `masjid` user intentionally doesn't have.)
+Commit the resulting `prisma/migrations/<timestamp>_<name>/` folder.
 
 ## Project structure
 

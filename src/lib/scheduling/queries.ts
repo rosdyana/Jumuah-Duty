@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { todayDateOnly } from "@/lib/scheduling/fridays";
 
 const ASSIGNMENT_INCLUDE = {
   assignedUser: { select: { id: true, name: true } },
@@ -7,7 +8,7 @@ const ASSIGNMENT_INCLUDE = {
 
 export async function getUpcomingSchedules(limit: number) {
   return prisma.schedule.findMany({
-    where: { status: "UPCOMING", date: { gte: startOfToday() } },
+    where: { status: "UPCOMING", date: { gte: todayDateOnly() } },
     orderBy: { date: "asc" },
     take: limit,
     include: { assignments: { include: ASSIGNMENT_INCLUDE } },
@@ -24,7 +25,7 @@ export async function getMyDuties(userId: string) {
     where: {
       assignedUserId: userId,
       status: { in: ["ASSIGNED", "CONFIRMED"] },
-      schedule: { date: { gte: startOfToday() }, status: "UPCOMING" },
+      schedule: { date: { gte: todayDateOnly() }, status: "UPCOMING" },
     },
     orderBy: { schedule: { date: "asc" } },
     include: { schedule: true },
@@ -35,7 +36,7 @@ export async function getReplacementNeeded() {
   const assignments = await prisma.scheduleAssignment.findMany({
     where: {
       status: "REPLACEMENT_NEEDED",
-      schedule: { date: { gte: startOfToday() }, status: "UPCOMING" },
+      schedule: { date: { gte: todayDateOnly() }, status: "UPCOMING" },
     },
     orderBy: { schedule: { date: "asc" } },
     include: {
@@ -52,9 +53,4 @@ export async function getReplacementNeeded() {
     ...a,
     reason: a.schedule.unavailabilityRequests.find((r) => r.dutyType === a.dutyType)?.reason,
   }));
-}
-
-function startOfToday() {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }

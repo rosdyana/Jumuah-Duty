@@ -1,14 +1,11 @@
-# Multi-stage build for the Next.js app (standalone output).
-FROM node:22-alpine AS deps
-WORKDIR /app
-RUN corepack enable
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
-
+# Single build stage: package.json's `postinstall` runs `prisma generate`, which
+# needs prisma/schema.prisma + a resolvable DATABASE_URL already present — so the
+# full source must be copied in *before* `pnpm install` runs (no separate
+# deps-only caching stage). Rebuilds are infrequent for this tool, so trading
+# some build-cache speed for a simpler, correct Dockerfile is the right call.
 FROM node:22-alpine AS builder
 WORKDIR /app
 RUN corepack enable
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Build-time-only placeholders: `prisma generate` and `next build` just need these
 # env vars to be resolvable, not a live connection. Real values are supplied at
@@ -19,7 +16,7 @@ ENV DATABASE_URL="mysql://build:build@localhost:3306/build" \
     AZURE_AD_CLIENT_ID="build" \
     AZURE_AD_CLIENT_SECRET="build" \
     AZURE_AD_TENANT_ID="build"
-RUN pnpm prisma generate
+RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
 FROM node:22-alpine AS runner
@@ -34,6 +31,11 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+# prisma/seed.ts imports src/lib/prisma.ts (which imports the generated client
+# under src/generated/prisma) — the standalone Next.js output doesn't preserve
+# this source tree, so it's copied explicitly for `prisma db seed` to run.
+COPY --from=builder /app/src ./src
 COPY docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 EXPOSE 3000
