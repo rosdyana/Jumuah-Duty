@@ -41,13 +41,16 @@ export function nextFridayOnOrAfter(dateOnly: Date): Date {
 }
 
 /**
- * Next `count` Fridays starting from `startDateOnly` (defaults to the next upcoming
- * Friday on/after today). If `startDateOnly` isn't itself a Friday, it's rolled forward
- * to the next one — admin-facing UI should default its date picker to this same value
- * rather than hiding the rule entirely.
+ * All Fridays between `startDateOnly` and `endDateOnly` (inclusive). If `startDateOnly`
+ * isn't itself a Friday, it's rolled forward to the next one — admin-facing UI should
+ * make this rule visible rather than hiding it. Returns `[]` if the rolled-forward start
+ * is already past `endDateOnly`.
  */
-export function getNextNFridays(count: number, startDateOnly?: Date): Date[] {
-  const base = startDateOnly ?? todayDateOnly();
-  const start = isFriday(base) ? base : nextFridayOnOrAfter(base);
-  return Array.from({ length: count }, (_, i) => addDays(start, i * 7));
+export function getFridaysInRange(startDateOnly: Date, endDateOnly: Date): Date[] {
+  const start = isFriday(startDateOnly) ? startDateOnly : nextFridayOnOrAfter(startDateOnly);
+  const dates: Date[] = [];
+  for (let d = start; d <= endDateOnly; d = addDays(d, 7)) {
+    dates.push(d);
+  }
+  return dates;
 }

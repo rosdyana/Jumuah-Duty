@@ -4,15 +4,19 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { generateUpcomingSchedules } from "@/lib/scheduling/persist";
-import { getNextNFridays } from "@/lib/scheduling/fridays";
-import { generateSchedulesSchema, overrideAssignmentSchema } from "@/lib/validation/schemas";
+import { getFridaysInRange, todayDateOnly } from "@/lib/scheduling/fridays";
+import {
+  deleteScheduleSchema,
+  generateSchedulesSchema,
+  overrideAssignmentSchema,
+} from "@/lib/validation/schemas";
 import type { z } from "zod";
 
 export async function generateSchedules(input: z.infer<typeof generateSchedulesSchema>) {
   await requireAdmin();
-  const { count, startDate } = generateSchedulesSchema.parse(input);
+  const { startDate, endDate } = generateSchedulesSchema.parse(input);
 
-  const dates = getNextNFridays(count, startDate);
+  const dates = getFridaysInRange(startDate, endDate);
   const results = await generateUpcomingSchedules(dates);
 
   revalidatePath("/admin/schedules");
@@ -20,6 +24,31 @@ export async function generateSchedules(input: z.infer<typeof generateSchedulesS
   revalidatePath("/upcoming");
 
   return results;
+}
+
+export async function deleteSchedule(input: z.infer<typeof deleteScheduleSchema>) {
+  await requireAdmin();
+  const { scheduleId } = deleteScheduleSchema.parse(input);
+
+  await prisma.schedule.delete({ where: { id: scheduleId } });
+
+  revalidatePath("/admin/schedules");
+  revalidatePath("/");
+  revalidatePath("/upcoming");
+}
+
+export async function clearUpcomingSchedules() {
+  await requireAdmin();
+
+  const { count } = await prisma.schedule.deleteMany({
+    where: { status: "UPCOMING", date: { gte: todayDateOnly() } },
+  });
+
+  revalidatePath("/admin/schedules");
+  revalidatePath("/");
+  revalidatePath("/upcoming");
+
+  return count;
 }
 
 export async function overrideAssignment(input: z.infer<typeof overrideAssignmentSchema>) {

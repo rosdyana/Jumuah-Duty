@@ -47,7 +47,20 @@ export const overrideAssignmentSchema = z.object({
   status: z.enum(["ASSIGNED", "REPLACEMENT_NEEDED", "CONFIRMED", "CANCELLED"]),
 });
 
-export const generateSchedulesSchema = z.object({
-  count: z.coerce.number().int().min(1).max(12).default(1),
-  startDate: z.coerce.date().optional(),
+export const generateSchedulesSchema = z
+  .object({
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+  })
+  .refine((d) => d.endDate >= d.startDate, {
+    message: "End date must be on or after start date",
+    path: ["endDate"],
+  })
+  .refine((d) => d.endDate.getTime() - d.startDate.getTime() <= 366 * 86_400_000, {
+    message: "Range can't exceed 1 year",
+    path: ["endDate"],
+  });
+
+export const deleteScheduleSchema = z.object({
+  scheduleId: z.string().min(1),
 });

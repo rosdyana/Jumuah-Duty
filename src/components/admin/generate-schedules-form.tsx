@@ -8,17 +8,30 @@ import { generateSchedules } from "@/server/actions/schedules";
 import { toast } from "sonner";
 
 export function GenerateSchedulesForm() {
-  const [count, setCount] = useState(1);
   const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [isPending, startTransition] = useTransition();
 
   function handleGenerate() {
+    if (!startDate || !endDate) {
+      toast.error("Pick both a start and end date");
+      return;
+    }
+    if (endDate < startDate) {
+      toast.error("End date must be on or after start date");
+      return;
+    }
+
     startTransition(async () => {
       try {
         const results = await generateSchedules({
-          count,
-          startDate: startDate ? new Date(startDate) : undefined,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
         });
+        if (results.length === 0) {
+          toast.info("No Fridays in that range");
+          return;
+        }
         const created = results.filter((r) => r.status === "CREATED").length;
         const skipped = results.length - created;
         toast.success(
@@ -34,24 +47,21 @@ export function GenerateSchedulesForm() {
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="gen-count">Number of Fridays</Label>
-        <Input
-          id="gen-count"
-          type="number"
-          min={1}
-          max={12}
-          value={count}
-          onChange={(e) => setCount(Number(e.target.value))}
-          className="w-32"
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="gen-start">Start date (optional)</Label>
+        <Label htmlFor="gen-start">Start date</Label>
         <Input
           id="gen-start"
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="gen-end">End date</Label>
+        <Input
+          id="gen-end"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
         />
       </div>
       <Button onClick={handleGenerate} disabled={isPending}>

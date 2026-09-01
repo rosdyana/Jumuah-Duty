@@ -1,48 +1,35 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { getNearestUpcomingSchedule } from "@/lib/scheduling/queries";
+import { ScheduleCalendar } from "@/components/schedule-calendar";
+import { getNearestUpcomingSchedule, getSchedulesInRange } from "@/lib/scheduling/queries";
+import { todayDateOnly } from "@/lib/scheduling/fridays";
+import { getMonthGridDays } from "@/lib/calendar-grid";
 import { formatFridayDate } from "@/lib/format";
-import type { DutyType } from "@/generated/prisma/enums";
+import { DUTY_LABELS } from "@/lib/duty-labels";
 
 export const dynamic = "force-dynamic";
 
-const DUTY_LABELS: Record<DutyType, string> = {
-  ROOM_BOOKING: "🏢 Room Booking",
-  KHATIB: "🎤 Khatib",
-  IMAM: "🕌 Imam",
-};
-const DUTY_ORDER: DutyType[] = ["ROOM_BOOKING", "KHATIB", "IMAM"];
-
 export default async function DashboardPage() {
-  const schedule = await getNearestUpcomingSchedule();
+  const today = todayDateOnly();
+  const monthDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+  const days = getMonthGridDays(today.getUTCFullYear(), today.getUTCMonth());
+  const [nearestSchedule, schedules] = await Promise.all([
+    getNearestUpcomingSchedule(),
+    getSchedulesInRange(days[0], days[days.length - 1]),
+  ]);
 
-  if (!schedule) {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-xl font-semibold">🕌 Jumuah Prayer</h1>
-        <p className="text-muted-foreground">
-          No upcoming schedule yet. An admin needs to generate one.
-        </p>
-      </div>
-    );
-  }
-
-  const needsReplacement = schedule.assignments.filter(
+  const needsReplacement = nearestSchedule?.assignments.filter(
     (a) => a.status === "REPLACEMENT_NEEDED"
   );
-  const byDuty = new Map(schedule.assignments.map((a) => [a.dutyType, a]));
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">
-        🕌 Jumuah Prayer — {formatFridayDate(schedule.date)}
-      </h1>
+      <h1 className="text-xl font-semibold">🕌 Jumuah Prayer</h1>
 
-      {needsReplacement.length > 0 && (
+      {needsReplacement && needsReplacement.length > 0 && (
         <Alert variant="destructive">
           <AlertTitle>⚠️ Replacement Needed</AlertTitle>
           <AlertDescription>
+            {formatFridayDate(nearestSchedule!.date)} —{" "}
             {needsReplacement
               .map((a) => DUTY_LABELS[a.dutyType] ?? a.dutyType)
               .join(", ")}{" "}
@@ -51,26 +38,13 @@ export default async function DashboardPage() {
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {DUTY_ORDER.map((dutyType) => {
-          const assignment = byDuty.get(dutyType);
-          return (
-            <Card key={dutyType}>
-              <CardHeader>
-                <CardTitle>{DUTY_LABELS[dutyType]}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <span className="text-lg">
-                  {assignment?.assignedUser?.name ?? "—"}
-                </span>
-                {assignment?.status === "REPLACEMENT_NEEDED" && (
-                  <Badge variant="destructive">Needs replacement</Badge>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <ScheduleCalendar monthDate={monthDate} days={days} schedules={schedules} />
+
+      {schedules.length === 0 && (
+        <p className="text-muted-foreground">
+          No schedule generated for this month yet. An admin needs to generate one.
+        </p>
+      )}
     </div>
   );
 }

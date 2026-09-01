@@ -6,6 +6,14 @@ const ASSIGNMENT_INCLUDE = {
   originalUser: { select: { id: true, name: true } },
 } as const;
 
+export async function getSchedulesInRange(start: Date, end: Date) {
+  return prisma.schedule.findMany({
+    where: { date: { gte: start, lte: end } },
+    orderBy: { date: "asc" },
+    include: { assignments: { include: ASSIGNMENT_INCLUDE } },
+  });
+}
+
 export async function getUpcomingSchedules(limit: number) {
   return prisma.schedule.findMany({
     where: { status: "UPCOMING", date: { gte: todayDateOnly() } },
