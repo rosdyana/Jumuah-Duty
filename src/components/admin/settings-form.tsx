@@ -15,6 +15,7 @@ import {
 import { settingsFormSchema, type SettingsFormInput } from "@/lib/validation/schemas";
 import { updateSettings } from "@/server/actions/settings";
 import { toast } from "sonner";
+import { SectionHeader } from "@/components/section-header";
 
 export function SettingsForm({
   initial,
@@ -44,6 +45,10 @@ export function SettingsForm({
 
   return (
     <div className="flex max-w-md flex-col gap-4">
+      <SectionHeader
+        title="Assignment rules"
+        description="Control how duties are assigned across the rotation."
+      />
       <div className="flex flex-col gap-1.5">
         <Label>Fixed Room Booker</Label>
         <Select
@@ -76,6 +81,11 @@ export function SettingsForm({
         />
       </div>
 
+      <SectionHeader
+        title="Notifications"
+        description="Manage reminder and summary emails."
+        className="border-t pt-4"
+      />
       <div className="flex items-center justify-between">
         <Label htmlFor="reminder-enabled">H-1 reminder enabled</Label>
         <Switch

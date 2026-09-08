@@ -50,7 +50,7 @@ export function RotationList({
             className="flex items-center justify-between rounded-md border px-3 py-2"
           >
             <span className="text-sm">
-              <span className="mr-2 inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              <span className="mr-2 inline-flex size-5 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-bold tabular-nums text-primary">
                 {i + 1}
               </span>
               {member.userName}

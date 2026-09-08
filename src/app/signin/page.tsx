@@ -5,7 +5,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BrandMark } from "@/components/brand-mark";
@@ -25,9 +24,9 @@ export default async function SignInPage(props: PageProps<"/signin">) {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <BrandMark className="mb-2 size-10 rounded-xl" iconClassName="size-5" />
-          <CardTitle className="text-lg font-bold tracking-tight">
+          <h1 className="font-heading text-2xl font-bold tracking-tight">
             Jumuah Duty Scheduler
-          </CardTitle>
+          </h1>
           <CardDescription>
             Sign in with your Microsoft work account to continue.
           </CardDescription>

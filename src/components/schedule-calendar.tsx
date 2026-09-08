@@ -62,7 +62,7 @@ export function ScheduleCalendar({
               <div className="flex items-center justify-between">
                 <span
                   className={cn(
-                    "font-medium",
+                    "font-mono font-medium tabular-nums",
                     isToday &&
                       "flex size-5 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground"
                   )}
@@ -70,7 +70,7 @@ export function ScheduleCalendar({
                   {day.getUTCDate()}
                 </span>
                 {friday && needsReplacement && (
-                  <Badge variant="destructive" className="h-4 px-1 text-[10px]">
+                  <Badge variant="destructive" className="h-4 px-1 text-2xs">
                     !
                   </Badge>
                 )}
