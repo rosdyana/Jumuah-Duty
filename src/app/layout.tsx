@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Masjid Management",
   description: "Jumuah duty scheduling and rotation management",
+  verification: {
+    google: "CK2rt5cMi_S68_aSWqRpedRmqIy5-qlAHmN8gO62-GE",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
