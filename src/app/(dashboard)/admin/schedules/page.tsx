@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
 import { formatFridayDate } from "@/lib/format";
 import { GenerateSchedulesForm } from "@/components/admin/generate-schedules-form";
@@ -25,8 +26,8 @@ export default async function AdminSchedulesPage() {
   });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Schedule Generation</h1>
+    <div className="space-y-6">
+      <PageHeader title="Schedule Generation" />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <GenerateSchedulesForm />
         <ClearSchedulesButton />

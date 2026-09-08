@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { PageHeader } from "@/components/page-header";
 import { formatFridayDate } from "@/lib/format";
 import { OverrideAssignmentRow } from "@/components/admin/override-assignment-row";
 import { DUTY_LABELS, DUTY_ORDER } from "@/lib/duty-labels";
@@ -24,10 +25,8 @@ export default async function AdminScheduleOverridePage(
   const byDuty = new Map(schedule.assignments.map((a) => [a.dutyType, a]));
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">
-        Manual Override — {formatFridayDate(schedule.date)}
-      </h1>
+    <div className="space-y-6">
+      <PageHeader title={`Manual Override — ${formatFridayDate(schedule.date)}`} />
       <div className="flex flex-col gap-3">
         {DUTY_ORDER.map((dutyType) => {
           const assignment = byDuty.get(dutyType);

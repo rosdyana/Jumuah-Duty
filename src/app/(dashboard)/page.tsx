@@ -1,4 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { PageHeader } from "@/components/page-header";
 import { ScheduleCalendar } from "@/components/schedule-calendar";
 import { getNearestUpcomingSchedule, getSchedulesInRange } from "@/lib/scheduling/queries";
 import { todayDateOnly } from "@/lib/scheduling/fridays";
@@ -23,8 +24,8 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Jumuah Prayer</h1>
+    <div className="space-y-6">
+      <PageHeader title="Jumuah Prayer" />
 
       {needsReplacement && needsReplacement.length > 0 && (
         <Alert variant="destructive">

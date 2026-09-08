@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { requireUser } from "@/lib/auth-guards";
+import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
 import { getReplacementNeeded } from "@/lib/scheduling/queries";
 import { formatFridayDate } from "@/lib/format";
@@ -36,8 +37,8 @@ export default async function ReplacementBoardPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Replacement Needed</h1>
+    <div className="space-y-6">
+      <PageHeader title="Replacement Needed" />
       {assignments.length === 0 ? (
         <p className="text-muted-foreground">
           Nothing needs a replacement right now.

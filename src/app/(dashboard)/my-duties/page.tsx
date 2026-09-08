@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/page-header";
 import { requireUser } from "@/lib/auth-guards";
 import { getMyDuties } from "@/lib/scheduling/queries";
 import { formatFridayDate } from "@/lib/format";
@@ -17,14 +18,14 @@ export default async function MyDutiesPage() {
   const duties = await getMyDuties(user.id);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">My Upcoming Duties</h1>
+    <div className="space-y-6">
+      <PageHeader title="My Upcoming Duties" />
       {duties.length === 0 ? (
         <p className="text-muted-foreground">
           You have no upcoming duties assigned.
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {duties.map((duty) => {
             const DutyIcon = DUTY_ICONS[duty.dutyType];
             return (

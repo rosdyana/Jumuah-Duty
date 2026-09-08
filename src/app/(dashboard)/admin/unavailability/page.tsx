@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
 import { formatFridayDate } from "@/lib/format";
 import {
@@ -25,8 +26,8 @@ export default async function AdminUnavailabilityPage() {
   });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Unavailability History</h1>
+    <div className="space-y-6">
+      <PageHeader title="Unavailability History" />
       <Table>
         <TableHeader>
           <TableRow>

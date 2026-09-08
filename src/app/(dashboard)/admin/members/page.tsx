@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
 import { MemberFormDialog } from "@/components/admin/member-form-dialog";
 import { MemberActiveToggle } from "@/components/admin/member-active-toggle";
@@ -17,11 +18,10 @@ export default async function AdminMembersPage() {
   const members = await prisma.user.findMany({ orderBy: { name: "asc" } });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Members</h1>
+    <div className="space-y-6">
+      <PageHeader title="Members">
         <MemberFormDialog />
-      </div>
+      </PageHeader>
       <Table>
         <TableHeader>
           <TableRow>

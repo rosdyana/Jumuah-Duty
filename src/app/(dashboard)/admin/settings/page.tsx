@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { PageHeader } from "@/components/page-header";
 import { SettingsForm } from "@/components/admin/settings-form";
 
 export const dynamic = "force-dynamic";
@@ -14,8 +15,8 @@ export default async function AdminSettingsPage() {
   ]);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+    <div className="space-y-6">
+      <PageHeader title="Settings" />
       <SettingsForm
         initial={{
           fixedRoomBookerId: settings.fixedRoomBookerId,

@@ -19,10 +19,7 @@ export function NavLinks({
   return (
     <>
       {isAdminGroup && (
-        <span
-          aria-hidden
-          className="mx-1 hidden h-4 w-px bg-border sm:inline-block"
-        />
+        <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-border" />
       )}
       {links.map((link) => {
         const active =

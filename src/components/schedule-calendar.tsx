@@ -53,7 +53,7 @@ export function ScheduleCalendar({
             <div
               key={dateKey(day)}
               className={cn(
-                "min-h-24 rounded-md border p-1.5 text-xs transition-colors",
+                "min-h-24 rounded-md border p-1.5 text-xs transition-colors sm:min-h-28 sm:p-2 lg:min-h-32",
                 !isCurrentMonth && "opacity-40",
                 !friday && "bg-muted/30 text-muted-foreground",
                 isToday && "border-primary/60 ring-1 ring-primary/40"
@@ -90,7 +90,7 @@ export function ScheduleCalendar({
                       const assignment = byDuty.get(duty);
                       const DutyIcon = DUTY_ICONS[duty];
                       return (
-                        <div key={duty} className="flex items-center gap-1 truncate">
+                        <div key={duty} className="flex items-center gap-1.5 truncate">
                           <DutyIcon className="size-3 shrink-0 text-primary" />
                           <span className="truncate">
                             {assignment?.assignedUser?.name ?? "—"}

@@ -26,21 +26,15 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-svh flex-col">
       <header className="border-b">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-3">
-          <div className="flex flex-wrap items-center gap-1">
-            <span className="mr-3 flex items-center gap-2">
-              <BrandMark className="size-7" />
-              <span className="font-heading text-sm font-bold tracking-tight">
-                Jumuah Duty
-              </span>
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <span className="flex shrink-0 items-center gap-2">
+            <BrandMark className="size-7" />
+            <span className="font-heading text-sm font-bold tracking-tight">
+              Jumuah Duty
             </span>
-            <NavLinks links={NAV_LINKS} />
-            {session?.user?.role === "ADMIN" && (
-              <NavLinks links={ADMIN_LINKS} isAdminGroup />
-            )}
-          </div>
+          </span>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span>{session?.user?.name}</span>
+            <span className="hidden sm:inline">{session?.user?.name}</span>
             <form
               action={async () => {
                 "use server";
@@ -53,8 +47,16 @@ export default async function DashboardLayout({
             </form>
           </div>
         </div>
+        <div className="mx-auto max-w-5xl overflow-x-auto px-4 pb-3 sm:px-6">
+          <div className="flex w-max items-center gap-1">
+            <NavLinks links={NAV_LINKS} />
+            {session?.user?.role === "ADMIN" && (
+              <NavLinks links={ADMIN_LINKS} isAdminGroup />
+            )}
+          </div>
+        </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
         {children}
       </main>
     </div>

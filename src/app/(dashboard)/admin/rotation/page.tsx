@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
 import { RotationList } from "@/components/admin/rotation-list";
 
@@ -23,8 +24,8 @@ export default async function AdminRotationPage() {
   const imamUserIds = new Set(imamMembers.map((m) => m.userId));
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Rotation Configuration</h1>
+    <div className="space-y-6">
+      <PageHeader title="Rotation Configuration" />
       <Tabs defaultValue="khatib">
         <TabsList>
           <TabsTrigger value="khatib">Khatib</TabsTrigger>

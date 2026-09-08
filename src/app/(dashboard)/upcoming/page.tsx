@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 import { ScheduleCalendar } from "@/components/schedule-calendar";
 import { getSchedulesInRange } from "@/lib/scheduling/queries";
 import { todayDateOnly } from "@/lib/scheduling/fridays";
@@ -50,9 +51,8 @@ export default async function UpcomingSchedulePage(props: PageProps<"/upcoming">
   const next = shiftMonth(year, monthIndex0, 1);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold tracking-tight">Upcoming Schedule</h1>
+    <div className="space-y-6">
+      <PageHeader title="Upcoming Schedule">
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -72,7 +72,7 @@ export default async function UpcomingSchedulePage(props: PageProps<"/upcoming">
             Next →
           </Button>
         </div>
-      </div>
+      </PageHeader>
       <ScheduleCalendar monthDate={monthDate} days={days} schedules={schedules} />
     </div>
   );
