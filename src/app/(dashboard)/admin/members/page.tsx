@@ -19,7 +19,7 @@ export default async function AdminMembersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Members</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Members</h1>
         <MemberFormDialog />
       </div>
       <Table>

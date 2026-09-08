@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { BrandMark } from "@/components/brand-mark";
 
 const ERROR_MESSAGES: Record<string, string> = {
   AccessDenied:
@@ -20,10 +21,13 @@ export default async function SignInPage(props: PageProps<"/signin">) {
   const error = Array.isArray(errorParam) ? errorParam[0] : errorParam;
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-6">
+    <div className="flex min-h-svh items-center justify-center bg-secondary/40 p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>🕌 Jumuah Duty Scheduler</CardTitle>
+          <BrandMark className="mb-2 size-10 rounded-xl" iconClassName="size-5" />
+          <CardTitle className="text-lg font-bold tracking-tight">
+            Jumuah Duty Scheduler
+          </CardTitle>
           <CardDescription>
             Sign in with your Microsoft work account to continue.
           </CardDescription>

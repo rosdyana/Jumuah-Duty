@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/brand-mark";
+import { NavLinks } from "@/components/nav-links";
 
 const NAV_LINKS = [
   { href: "/", label: "Dashboard" },
@@ -27,30 +28,16 @@ export default async function DashboardLayout({
       <header className="border-b">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-3">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="mr-2 font-heading text-sm font-semibold">
-              🕌 Jumuah Duty
+            <span className="mr-3 flex items-center gap-2">
+              <BrandMark className="size-7" />
+              <span className="font-heading text-sm font-bold tracking-tight">
+                Jumuah Duty
+              </span>
             </span>
-            {NAV_LINKS.map((link) => (
-              <Button
-                key={link.href}
-                variant="ghost"
-                size="sm"
-                render={<Link href={link.href} />}
-              >
-                {link.label}
-              </Button>
-            ))}
-            {session?.user?.role === "ADMIN" &&
-              ADMIN_LINKS.map((link) => (
-                <Button
-                  key={link.href}
-                  variant="ghost"
-                  size="sm"
-                  render={<Link href={link.href} />}
-                >
-                  {link.label}
-                </Button>
-              ))}
+            <NavLinks links={NAV_LINKS} />
+            {session?.user?.role === "ADMIN" && (
+              <NavLinks links={ADMIN_LINKS} isAdminGroup />
+            )}
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>{session?.user?.name}</span>

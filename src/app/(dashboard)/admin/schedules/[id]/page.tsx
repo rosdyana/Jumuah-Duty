@@ -2,16 +2,9 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatFridayDate } from "@/lib/format";
 import { OverrideAssignmentRow } from "@/components/admin/override-assignment-row";
-import type { DutyType } from "@/generated/prisma/enums";
+import { DUTY_LABELS, DUTY_ORDER } from "@/lib/duty-labels";
 
 export const dynamic = "force-dynamic";
-
-const DUTY_LABELS: Record<DutyType, string> = {
-  ROOM_BOOKING: "🏢 Room Booking",
-  KHATIB: "🎤 Khatib",
-  IMAM: "🕌 Imam",
-};
-const DUTY_ORDER: DutyType[] = ["ROOM_BOOKING", "KHATIB", "IMAM"];
 
 export default async function AdminScheduleOverridePage(
   props: PageProps<"/admin/schedules/[id]">
@@ -32,7 +25,7 @@ export default async function AdminScheduleOverridePage(
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">
+      <h1 className="text-2xl font-bold tracking-tight">
         Manual Override — {formatFridayDate(schedule.date)}
       </h1>
       <div className="flex flex-col gap-3">

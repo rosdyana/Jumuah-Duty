@@ -26,7 +26,7 @@ export default async function AdminSchedulesPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Schedule Generation</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Schedule Generation</h1>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <GenerateSchedulesForm />
         <ClearSchedulesButton />

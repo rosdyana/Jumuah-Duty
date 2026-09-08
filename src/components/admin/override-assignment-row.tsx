@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { overrideAssignment } from "@/server/actions/schedules";
+import { ASSIGNMENT_STATUS_LABELS } from "@/lib/status-labels";
 import { toast } from "sonner";
 
 const STATUS_OPTIONS = ["ASSIGNED", "REPLACEMENT_NEEDED", "CONFIRMED", "CANCELLED"] as const;
@@ -49,7 +50,7 @@ export function OverrideAssignmentRow({
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-md border p-3">
-      <div className="min-w-32 font-medium">{dutyLabel}</div>
+      <div className="min-w-32 font-semibold">{dutyLabel}</div>
       <Select value={userId} onValueChange={(v) => setUserId(v ?? UNASSIGNED)}>
         <SelectTrigger className="w-48">
           <SelectValue placeholder="Unassigned" />
@@ -70,7 +71,7 @@ export function OverrideAssignmentRow({
         <SelectContent>
           {STATUS_OPTIONS.map((s) => (
             <SelectItem key={s} value={s}>
-              {s}
+              {ASSIGNMENT_STATUS_LABELS[s]}
             </SelectItem>
           ))}
         </SelectContent>

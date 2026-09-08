@@ -5,6 +5,7 @@ import { todayDateOnly } from "@/lib/scheduling/fridays";
 import { getMonthGridDays } from "@/lib/calendar-grid";
 import { formatFridayDate } from "@/lib/format";
 import { DUTY_LABELS } from "@/lib/duty-labels";
+import { TriangleAlert } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -23,11 +24,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">🕌 Jumuah Prayer</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Jumuah Prayer</h1>
 
       {needsReplacement && needsReplacement.length > 0 && (
         <Alert variant="destructive">
-          <AlertTitle>⚠️ Replacement Needed</AlertTitle>
+          <TriangleAlert />
+          <AlertTitle>Replacement needed</AlertTitle>
           <AlertDescription>
             {formatFridayDate(nearestSchedule!.date)} —{" "}
             {needsReplacement

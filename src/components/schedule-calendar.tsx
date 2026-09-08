@@ -3,9 +3,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { isFriday } from "@/lib/scheduling/fridays";
+import { isFriday, todayDateOnly } from "@/lib/scheduling/fridays";
 import { formatFridayDate } from "@/lib/format";
-import { DUTY_LABELS, DUTY_ORDER, DUTY_SHORT_LABELS } from "@/lib/duty-labels";
+import { DUTY_ICONS, DUTY_LABELS, DUTY_ORDER } from "@/lib/duty-labels";
+import { ASSIGNMENT_STATUS_LABELS } from "@/lib/status-labels";
 import type { getSchedulesInRange } from "@/lib/scheduling/queries";
 
 type ScheduleWithAssignments = Awaited<ReturnType<typeof getSchedulesInRange>>[number];
@@ -26,10 +27,11 @@ export function ScheduleCalendar({
   schedules: ScheduleWithAssignments[];
 }) {
   const scheduleByDate = new Map(schedules.map((s) => [dateKey(s.date), s]));
+  const todayKey = dateKey(todayDateOnly());
 
   return (
     <div className="space-y-1">
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         {WEEKDAY_LABELS.map((label) => (
           <div key={label}>{label}</div>
         ))}
@@ -40,6 +42,7 @@ export function ScheduleCalendar({
             day.getUTCFullYear() === monthDate.getUTCFullYear() &&
             day.getUTCMonth() === monthDate.getUTCMonth();
           const friday = isFriday(day);
+          const isToday = dateKey(day) === todayKey;
           const schedule = scheduleByDate.get(dateKey(day));
           const byDuty = new Map(schedule?.assignments.map((a) => [a.dutyType, a]) ?? []);
           const needsReplacement = schedule?.assignments.some(
@@ -50,13 +53,22 @@ export function ScheduleCalendar({
             <div
               key={dateKey(day)}
               className={cn(
-                "min-h-24 rounded-md border p-1.5 text-xs",
+                "min-h-24 rounded-md border p-1.5 text-xs transition-colors",
                 !isCurrentMonth && "opacity-40",
-                !friday && "bg-muted/30 text-muted-foreground"
+                !friday && "bg-muted/30 text-muted-foreground",
+                isToday && "border-primary/60 ring-1 ring-primary/40"
               )}
             >
               <div className="flex items-center justify-between">
-                <span className="font-medium">{day.getUTCDate()}</span>
+                <span
+                  className={cn(
+                    "font-medium",
+                    isToday &&
+                      "flex size-5 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground"
+                  )}
+                >
+                  {day.getUTCDate()}
+                </span>
                 {friday && needsReplacement && (
                   <Badge variant="destructive" className="h-4 px-1 text-[10px]">
                     !
@@ -76,9 +88,13 @@ export function ScheduleCalendar({
                   >
                     {DUTY_ORDER.map((duty) => {
                       const assignment = byDuty.get(duty);
+                      const DutyIcon = DUTY_ICONS[duty];
                       return (
-                        <div key={duty} className="truncate">
-                          {DUTY_SHORT_LABELS[duty]} {assignment?.assignedUser?.name ?? "—"}
+                        <div key={duty} className="flex items-center gap-1 truncate">
+                          <DutyIcon className="size-3 shrink-0 text-primary" />
+                          <span className="truncate">
+                            {assignment?.assignedUser?.name ?? "—"}
+                          </span>
                         </div>
                       );
                     })}
@@ -90,13 +106,19 @@ export function ScheduleCalendar({
                     <div className="space-y-2">
                       {DUTY_ORDER.map((duty) => {
                         const assignment = byDuty.get(duty);
+                        const DutyIcon = DUTY_ICONS[duty];
                         return (
                           <div key={duty} className="flex items-center justify-between gap-2">
-                            <span>{DUTY_LABELS[duty]}</span>
+                            <span className="flex items-center gap-1.5">
+                              <DutyIcon className="size-4 text-primary" />
+                              {DUTY_LABELS[duty]}
+                            </span>
                             <span className="flex items-center gap-2 text-right">
                               {assignment?.assignedUser?.name ?? "—"}
                               {assignment?.status === "REPLACEMENT_NEEDED" && (
-                                <Badge variant="destructive">Needs replacement</Badge>
+                                <Badge variant="destructive">
+                                  {ASSIGNMENT_STATUS_LABELS.REPLACEMENT_NEEDED}
+                                </Badge>
                               )}
                             </span>
                           </div>

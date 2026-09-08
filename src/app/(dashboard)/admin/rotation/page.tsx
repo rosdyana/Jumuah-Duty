@@ -24,7 +24,7 @@ export default async function AdminRotationPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Rotation Configuration</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Rotation Configuration</h1>
       <Tabs defaultValue="khatib">
         <TabsList>
           <TabsTrigger value="khatib">Khatib</TabsTrigger>

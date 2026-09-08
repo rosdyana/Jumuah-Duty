@@ -14,6 +14,7 @@ import {
   moveRotationMember,
   removeRotationMember,
 } from "@/server/actions/rotation-config";
+import { ArrowDown, ArrowUp, X } from "lucide-react";
 import { toast } from "sonner";
 
 type RotationDutyType = "KHATIB" | "IMAM";
@@ -49,7 +50,9 @@ export function RotationList({
             className="flex items-center justify-between rounded-md border px-3 py-2"
           >
             <span className="text-sm">
-              <span className="mr-2 text-muted-foreground">{i + 1}.</span>
+              <span className="mr-2 inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                {i + 1}
+              </span>
               {member.userName}
             </span>
             <div className="flex gap-1">
@@ -58,24 +61,27 @@ export function RotationList({
                 size="icon-sm"
                 disabled={isPending || i === 0}
                 onClick={() => runAction(() => moveRotationMember(member.id, "up"))}
+                aria-label="Move up"
               >
-                ↑
+                <ArrowUp />
               </Button>
               <Button
                 variant="outline"
                 size="icon-sm"
                 disabled={isPending || i === members.length - 1}
                 onClick={() => runAction(() => moveRotationMember(member.id, "down"))}
+                aria-label="Move down"
               >
-                ↓
+                <ArrowDown />
               </Button>
               <Button
                 variant="outline"
                 size="icon-sm"
                 disabled={isPending}
                 onClick={() => runAction(() => removeRotationMember(member.id))}
+                aria-label="Remove from rotation"
               >
-                ✕
+                <X />
               </Button>
             </div>
           </li>

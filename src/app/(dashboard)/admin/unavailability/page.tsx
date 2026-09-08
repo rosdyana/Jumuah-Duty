@@ -9,14 +9,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { formatFridayDate } from "@/lib/format";
+import {
+  UNAVAILABILITY_STATUS_LABELS,
+  UNAVAILABILITY_STATUS_VARIANT,
+} from "@/lib/status-labels";
+import { DUTY_LABELS } from "@/lib/duty-labels";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  ACTIVE: "destructive",
-  RESOLVED: "default",
-  CANCELLED: "outline",
-};
 
 export default async function AdminUnavailabilityPage() {
   const requests = await prisma.unavailabilityRequest.findMany({
@@ -27,7 +26,7 @@ export default async function AdminUnavailabilityPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Unavailability History</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Unavailability History</h1>
       <Table>
         <TableHeader>
           <TableRow>
@@ -43,10 +42,12 @@ export default async function AdminUnavailabilityPage() {
             <TableRow key={r.id}>
               <TableCell className="font-medium">{r.user.name}</TableCell>
               <TableCell>{formatFridayDate(r.schedule.date)}</TableCell>
-              <TableCell>{r.dutyType}</TableCell>
+              <TableCell>{DUTY_LABELS[r.dutyType]}</TableCell>
               <TableCell className="text-muted-foreground">{r.reason}</TableCell>
               <TableCell>
-                <Badge variant={STATUS_VARIANT[r.status] ?? "outline"}>{r.status}</Badge>
+                <Badge variant={UNAVAILABILITY_STATUS_VARIANT[r.status] ?? "outline"}>
+                  {UNAVAILABILITY_STATUS_LABELS[r.status] ?? r.status}
+                </Badge>
               </TableCell>
             </TableRow>
           ))}
