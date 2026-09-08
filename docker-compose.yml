@@ -1,7 +1,10 @@
 # Copy env.example to .env and fill in real values before running.
-# `docker compose up -d` brings up mysql (persistent volume), the Next.js app, and
-# the daily reminder scheduler. Put a reverse proxy (e.g. Caddy) in front of the
-# app's exposed port on the host.
+# `app`/`scheduler` images are built by .github/workflows/docker-publish.yml and
+# published to GHCR on version tags (git tag vX.Y.Z && git push origin vX.Y.Z) —
+# this file only pulls them, it never builds locally. Run `docker compose pull`
+# to fetch the latest images, then `docker compose up -d` to (re)start
+# mysql (persistent volume), the Next.js app, and the daily reminder scheduler.
+# Put a reverse proxy (e.g. Caddy) in front of the app's exposed port on the host.
 services:
   mysql:
     image: mysql:8.4
@@ -23,9 +26,7 @@ services:
       retries: 20
 
   app:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
+    image: ghcr.io/rosdyana/jumuah-duty-app:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       mysql:
@@ -49,8 +50,7 @@ services:
       - "127.0.0.1:${APP_PORT:-3000}:3000"
 
   scheduler:
-    build:
-      context: docker/scheduler
+    image: ghcr.io/rosdyana/jumuah-duty-scheduler:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       - app

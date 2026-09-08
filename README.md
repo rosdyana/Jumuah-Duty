@@ -57,10 +57,33 @@ scenarios worth checking.
 
 ## Deployment (Docker Compose)
 
+Images are built by CI (`.github/workflows/docker-publish.yml`) and published
+to GHCR whenever a version tag is pushed:
+
 ```bash
-cp env.example .env   # fill in real values on the server
-docker compose up -d --build
+git tag v0.1.0
+git push origin v0.1.0
 ```
+
+Once the workflow finishes (check the Actions tab), the server only needs to
+pull and (re)start — no source checkout, Dockerfiles, or `node_modules`
+required, just this repo's `docker-compose.yml`, `.env`, and
+`docker/mysql/init/`:
+
+```bash
+cp env.example .env   # fill in real values on the server, once
+docker compose pull
+docker compose up -d
+```
+
+> **First release only:** GHCR packages default to private even in a public
+> repo. After the first tag builds, open the two new packages
+> (`jumuah-duty-app`, `jumuah-duty-scheduler`) under your GitHub account's
+> Packages tab and set visibility to **Public** — after that, `docker compose
+> pull` needs no `docker login` on the server, ever again.
+
+To roll back to a previous release, set `IMAGE_TAG` in `.env` (e.g.
+`IMAGE_TAG=v0.1.0`) before `docker compose pull && docker compose up -d`.
 
 This brings up three containers:
 - **mysql** — data persists in the `mysql_data` named volume across
@@ -93,7 +116,8 @@ build the OAuth callback/redirect URLs, and it must match the redirect URI
 registered on the Azure AD app.
 
 Verified end-to-end (clean volume → build → migrate → seed → serve →
-scheduler auth) via `docker compose up -d --build` during development.
+scheduler auth) via `docker compose pull && docker compose up -d` during
+development.
 
 ### Adding a future migration
 
