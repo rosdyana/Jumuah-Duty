@@ -28,7 +28,8 @@ export default async function SignInPage(props: PageProps<"/signin">) {
             Jumuah Duty Scheduler
           </h1>
           <CardDescription>
-            Sign in with your Microsoft work account to continue.
+            Internal duty-scheduling tool for masjid administrators. Sign in
+            with your organization&apos;s Microsoft work account to continue.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
