@@ -14,6 +14,7 @@ const ADMIN_LINKS = [
   { href: "/admin/members", label: "Members" },
   { href: "/admin/rotation", label: "Rotation" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/settings/holidays", label: "Holidays" },
   { href: "/admin/schedules", label: "Schedules" },
   { href: "/admin/unavailability", label: "Unavailability" },
 ];

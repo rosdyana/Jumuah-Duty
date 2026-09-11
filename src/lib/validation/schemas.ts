@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isFriday } from "@/lib/scheduling/fridays";
 
 export const dutyTypeSchema = z.enum(["ROOM_BOOKING", "KHATIB", "IMAM"]);
 export const rotationDutyTypeSchema = z.enum(["KHATIB", "IMAM"]);
@@ -63,4 +64,20 @@ export const generateSchedulesSchema = z
 
 export const deleteScheduleSchema = z.object({
   scheduleId: z.string().min(1),
+});
+
+export const addHolidaysSchema = z.object({
+  dates: z
+    .array(z.coerce.date())
+    .min(1, "Select at least one date")
+    .max(50, "Select at most 50 dates at once")
+    .refine((dates) => dates.every(isFriday), {
+      message: "Only Fridays can be added to the holiday whitelist",
+    }),
+  reason: z.string().trim().max(191).optional(),
+});
+export type AddHolidaysInput = z.infer<typeof addHolidaysSchema>;
+
+export const removeHolidaySchema = z.object({
+  holidayId: z.string().min(1),
 });

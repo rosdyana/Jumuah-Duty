@@ -70,6 +70,7 @@ model User {
   assignmentsAssigned    ScheduleAssignment[]    @relation("AssignedUser")
   assignmentsOriginal    ScheduleAssignment[]    @relation("OriginalUser")
   unavailabilityRequests UnavailabilityRequest[]
+  holidaysCreated        Holiday[]               @relation("HolidayCreatedBy")
 
   @@index([isActive])
   @@map("users")
@@ -167,6 +168,21 @@ model UnavailabilityRequest {
   @@index([scheduleId, dutyType])
   @@index([status])
   @@map("unavailability_requests")
+}
+
+// Whitelist of Fridays excluded from schedule generation. Matched against
+// Schedule.date by value (no FK) so removing a Holiday never cascades into an
+// already-cancelled Schedule — see applyHolidaysToSchedule in src/server/actions/holidays.ts.
+model Holiday {
+  id          String   @id @default(cuid())
+  date        DateTime @unique @db.Date
+  reason      String?  @db.VarChar(191)
+  createdById String?  @map("created_by_id")
+  createdBy   User?    @relation("HolidayCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([date])
+  @@map("holidays")
 }
 
 // Idempotency guard for H-1 / weekly reminder emails: create() throws on a duplicate

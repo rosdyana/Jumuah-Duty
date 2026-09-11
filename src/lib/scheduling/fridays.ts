@@ -40,6 +40,20 @@ export function nextFridayOnOrAfter(dateOnly: Date): Date {
   return addDays(dateOnly, diff);
 }
 
+/** Stable "YYYY-MM-DD" key for a date-only value, safe for Set/Map membership checks. */
+export function dateKey(dateOnly: Date): string {
+  const year = dateOnly.getUTCFullYear();
+  const month = String(dateOnly.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(dateOnly.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/** Removes any date present in `holidayDates`, matched by calendar day (not object identity). */
+export function excludeHolidays(dates: Date[], holidayDates: Date[]): Date[] {
+  const holidayKeys = new Set(holidayDates.map(dateKey));
+  return dates.filter((date) => !holidayKeys.has(dateKey(date)));
+}
+
 /**
  * All Fridays between `startDateOnly` and `endDateOnly` (inclusive). If `startDateOnly`
  * isn't itself a Friday, it's rolled forward to the next one — admin-facing UI should

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { generateUpcomingSchedules } from "@/lib/scheduling/persist";
-import { getFridaysInRange, todayDateOnly } from "@/lib/scheduling/fridays";
+import { excludeHolidays, getFridaysInRange, todayDateOnly } from "@/lib/scheduling/fridays";
 import {
   deleteScheduleSchema,
   generateSchedulesSchema,
@@ -16,7 +16,15 @@ export async function generateSchedules(input: z.infer<typeof generateSchedulesS
   await requireAdmin();
   const { startDate, endDate } = generateSchedulesSchema.parse(input);
 
-  const dates = getFridaysInRange(startDate, endDate);
+  const candidateFridays = getFridaysInRange(startDate, endDate);
+  const holidays = await prisma.holiday.findMany({
+    where: { date: { in: candidateFridays } },
+    select: { date: true },
+  });
+  const dates = excludeHolidays(
+    candidateFridays,
+    holidays.map((h) => h.date)
+  );
   const results = await generateUpcomingSchedules(dates);
 
   revalidatePath("/admin/schedules");
